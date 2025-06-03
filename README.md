@@ -221,8 +221,8 @@ ollama pull mistral:7b
 ### 2. Repository Setup
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/hr-resource-chatbot.git
-cd hr-resource-chatbot
+git clone https://github.com/skhapijulhossen/gSearch.git
+cd gSearch
 ```
 
 ### 3. Environment Setup
@@ -246,7 +246,7 @@ pip install -r requirements.txt
 ### 4. Run FastAPI Backend
 ```bash
 # Start the FastAPI server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.api.main:app --host 0.0.0.0 --port 8000
 ```
 *Keep this terminal running - Backend API will be available at http://localhost:8000*
 
