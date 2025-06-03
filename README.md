@@ -16,6 +16,9 @@ pip install -r requirements.txt
 
 2. Start Ollama with Gemma 3:1b model:
 ```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
+```bash
 ollama run gemma:3b
 ```
 
