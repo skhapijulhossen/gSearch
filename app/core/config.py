@@ -15,19 +15,19 @@ class Settings(BaseSettings):
     API_PREFIX: str = ""
     
     # Vector Store Settings
-    VECTOR_STORE_PATH: str = "app/employee_faiss_index"
+    VECTOR_STORE_PATH: str = "employee_faiss_index"
     EMBEDDING_MODEL: str = "sentence-transformers/all-mpnet-base-v2"
     SIMILARITY_THRESHOLD: float = 0.3
     MAX_RESULTS: int = 5
     
     # LLM Settings
     OLLAMA_BASE_URL: str = "http://localhost:11434"
-    LLM_MODEL: str = "mistral:latest"
+    LLM_MODEL: str = "mistral:7b"
     LLM_TEMPERATURE: float = 0.2
     LLM_CONTEXT_SIZE: int = 4096
     
     # Data Settings
-    DATA_PATH: str = "app/data/employees.json"
+    DATA_PATH: str = "data/employees.json"
     
     class Config:
         env_file = ".env"
