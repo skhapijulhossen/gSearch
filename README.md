@@ -113,7 +113,6 @@ A Retrieval Augmented Generation (RAG) application for searching and analyzing e
 - Vector embedding generation using HuggingFaceEmbeddings
 - FAISS vector store creation and persistence
 - Similarity search with configurable score thresholds
-- Employee data loading and formatting for retrieval
 ```
 
 #### **LLM Service** (`llm_service.py`)
@@ -194,7 +193,7 @@ User Query
 ### **AI/ML Components**
 - **LangChain**: RAG pipeline orchestration
 - **FAISS**: Efficient vector similarity search
-- **Sentence Transformers**: Text embedding generation
+- **HuggingFace Transformers**: Text embedding generation
 - **Ollama**: Local LLM deployment and inference
 
 ### **Data Processing**
@@ -202,268 +201,194 @@ User Query
 - **JSON**: Structured data storage
 - **Pickle**: Serialized object storage
 
-## Design Patterns
-
-### **Repository Pattern**
-Services abstract data access, allowing for easy swapping of data sources without affecting business logic.
-
-### **Dependency Injection**
-Core components are injected into services, promoting testability and modularity.
-
-### **Factory Pattern**
-LLM and retriever components are created through factory methods, enabling different model configurations.
-
-### **Observer Pattern**
-Configuration changes can trigger re-initialization of dependent components.
-
-## Scalability Considerations
-
-### **Horizontal Scaling**
-- Stateless service design enables multiple instance deployment
-- Load balancing across API endpoints
-- Separate scaling of UI and API components
-
-### **Vertical Scaling**
-- FAISS index optimization for memory usage
-- Batch processing for large query volumes
-- Connection pooling for external services
-
-### **Caching Strategy**
-- Query result caching for frequently asked questions
-- Embedding caching to avoid recomputation
-- Model response caching for similar queries
-
-## Security Architecture
-
-### **Data Protection**
-- Local LLM deployment eliminates external data exposure
-- Input validation and sanitization
-- Rate limiting to prevent abuse
-
-### **Access Control**
-- API key authentication (planned)
-- Role-based access control (planned)
-- Audit logging for compliance
-
-## Performance Characteristics
-
-### **Response Times**
-- Vector search: < 100ms
-- LLM inference: 1-3 seconds
-- End-to-end query: 2-5 seconds
-
-### **Throughput**
-- Concurrent users: 10-50 (single instance)
-- Queries per second: 5-10
-- Scalable with horizontal deployment
-
-## Monitoring and Observability
-
-### **Metrics**
-- Query response times
-- Search accuracy metrics
-- System resource utilization
-- Error rates and types
-
-### **Logging**
-- Structured logging for query processing
-- Error tracking and debugging
-- Performance monitoring
-- User interaction analytics
-
-## Future Architecture Enhancements
-
-### **Microservices Migration**
-- Split services into independent containers
-- Service mesh for inter-service communication
-- Independent scaling and deployment
-
-### **Advanced AI Features**
-- Multi-modal search (text, documents, images)
-- Conversational memory and context
-- Personalized search results
-- Real-time learning and adaptation
-
-### **Enterprise Integration**
-- LDAP/Active Directory integration
-- HRMS system connectors
-- Single Sign-On (SSO) support
-- API gateway for external access
-
-
-
-
-### 1. `app/services/data_service.py`
-
-Loads and validates employee data from JSON files, preparing it for indexing and search.
-
-### 2. `app/services/retriever_service.py`
-
-Builds and manages the FAISS vector index, performing semantic search and formatting results with metadata.
-
-### 3. `app/services/llm_service.py`
-
-Handles LLM integration, uses prompts to generate answers, manages context, and deals with errors.
-
-### 4. `app/core/`
-
-* `config.py`: Configuration settings (API keys, environment variables).
-* `prompts.py`: LLM prompt templates.
-* `schemas.py`: Data models for request and response validation.
-
-### 5. `app/api/main.py`
-
-FastAPI backend exposing endpoints, processing queries, formatting responses, and logging errors.
-
-### 6. `app/streamlit_app.py`
-
-Streamlit frontend providing an interactive chatbot UI that connects to the backend.
-
-### 7. `data/employees.json`
-
-Sample employee data used for indexing and retrieval.
-
-### 8. `employee_faiss_index/`
-
-Stores the FAISS vector index and related metadata files for fast search.
-
-
-
 ## Setup & Installation
 
-1. Clone the repository:
+### 1. Ollama Setup
 ```bash
+# Install Ollama (if not already installed)
+# Visit https://ollama.ai for installation instructions
+
+# Start Ollama server
+ollama serve
+```
+*Keep this terminal running - Ollama server needs to stay active*
+
+```bash
+# In a new terminal, pull the Mistral model
+ollama pull mistral:7b
+```
+
+### 2. Repository Setup
+```bash
+# Clone the repository
 git clone https://github.com/yourusername/hr-resource-chatbot.git
 cd hr-resource-chatbot
 ```
 
-2. Install dependencies:
+### 3. Environment Setup
 ```bash
+# Create virtual environment (recommended)
+python -m venv venv
+
+# Activate virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Set up environment variables (if .env file exists)
+# Copy .env.example to .env and configure settings
 ```
 
-3. Start Ollama server:
+### 4. Run FastAPI Backend
 ```bash
-ollama run gemma:3b
+# Start the FastAPI server
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
+*Keep this terminal running - Backend API will be available at http://localhost:8000*
 
-4. Run the application:
+### 5. Run Streamlit Frontend
 ```bash
-uvicorn main:app --reload
+# Open a new terminal, navigate to project directory and activate venv
+cd hr-resource-chatbot
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+
+# Run Streamlit application
+streamlit run streamlit_app.py
 ```
+*Streamlit app will be available at http://localhost:8501*
+
+## Verification Steps
+
+1. **Check Ollama**: Visit http://localhost:11434/api/tags to see available models
+2. **Check FastAPI**: Visit http://localhost:8000/docs for API documentation
+3. **Check Streamlit**: Visit http://localhost:8501 for the chat interface
+
+## Troubleshooting
+
+- Ensure all three services (Ollama, FastAPI, Streamlit) are running simultaneously
+- Check that ports 8000, 8501, and 11434 are available
+- Verify Ollama model is properly loaded before starting other services
 
 ## API Documentation
 
-### POST /query
-Query the employee database using natural language.
+---
 
-Request:
+### 🔹 POST `/chat`
+
+**Description**:
+Query the employee database using **natural language** queries. Backed by a local LLM and RAG pipeline.
+
+**Request Body**:
+
 ```json
 {
-    "query": "Find employees with machine learning experience in healthcare projects"
+  "query": "Find employees with machine learning experience in healthcare projects"
 }
 ```
 
-Response:
+**Response**:
+
 ```json
 {
-    "response": "Based on the search results, I found the following employees...",
-    "matches": [
-        {
-            "name": "Alice Johnson",
-            "skills": ["Machine Learning", "Python", "Healthcare"],
-            "projects": ["Healthcare ML System"]
-        }
-    ]
+  "response": "Based on the search results, I found the following employees: Alice, Bob..."
 }
 ```
+
+**Errors**:
+
+* `400 Bad Request`: If the query is empty
+* `500 Internal Server Error`: On unexpected issues (LLM failure, etc.)
+
+---
+
+### 🔹 GET `/employees/search`
+
+**Description**:
+Search employees using structured filters (skills, name, experience, availability).
+
+**Query Parameters**:
+
+| Parameter        | Type     | Description                                      | Example      |
+| ---------------- | -------- | ------------------------------------------------ | ------------ |
+| `name`           | `string` | Search by name (partial match)                   | `Alice`      |
+| `skills`         | `string` | Comma-separated list of skills                   | `python, ml` |
+| `min_experience` | `int`    | Minimum required years of experience             | `3`          |
+| `availability`   | `string` | Availability status (`available`, `unavailable`) | `available`  |
+
+**Example**:
+
+```
+GET /employees/search?skills=python,ml&min_experience=2&availability=available
+```
+
+**Response**:
+
+```json
+{
+  "total": 2,
+  "employees": [
+    {
+      "name": "Alice Johnson",
+      "skills": ["Python", "ML"],
+      "experience_years": 4,
+      "availability": "available"
+    },
+    {
+      "name": "Bob Singh",
+      "skills": ["Python", "Machine Learning"],
+      "experience_years": 5,
+      "availability": "available"
+    }
+  ]
+}
+```
+
+**Errors**:
+
+* `500 Internal Server Error`: If filtering fails or employee data is invalid
+
+---
+
 
 ## AI Development Process
 
-### AI Tools Used
-- Cursor AI for code generation and refactoring
-- GitHub Copilot for real-time code suggestions
-- ChatGPT for architecture discussions and problem-solving
 
-### AI Assistance in Development
-- **Planning Phase (20% AI-assisted)**
-  - Architecture decisions and system design
-  - Technology stack selection
-  - API endpoint planning
+**Q: Which AI tools did you use?**
+A: I used **Cursor**, **Claude**, and **ChatGPT**.
 
-- **Implementation Phase (60% AI-assisted)**
-  - Code generation for boilerplate
-  - Implementation of RAG pipeline
-  - Vector store integration
-  - API endpoint development
+---
 
-- **Testing & Debugging (30% AI-assisted)**
-  - Test case generation
-  - Bug identification and fixes
-  - Performance optimization
+**Q: How did they help you?**
+A:
 
-### AI-Generated Solutions
-- Hybrid search implementation combining FAISS and keyword matching
-- Efficient document chunking strategy
-- Smart prompt engineering for better response quality
+* Helped with **refactoring code** and making it cleaner.
+* Gave **quick fixes** for bugs and errors.
+* ChatGPT helped with **improving the project architecture**.
 
-### Manual Solutions
-- Custom data validation logic
-- Complex error handling scenarios
-- Performance optimization for large datasets
+---
 
-## Technical Decisions
+**Q: How much of your code was AI-generated?**
+A: I wrote the **base or skeleton code myself** to stay in control. Around **the final refactored and improvement code was AI-assisted along with code documentation**, mainly for suggestions and improvements.
 
-### Model Selection
-- **Ollama (Local LLM)**
-  - Pros: Privacy, no API costs, full control
-  - Cons: Limited model options, local resource requirements
-  - Decision: Chose Ollama for data privacy and cost control
+---
 
-### Technology Stack
-- **FastAPI**: Modern, fast, and easy to use
-- **FAISS**: Efficient vector similarity search
-- **LangChain**: Flexible RAG pipeline implementation
-- **Ollama**: Local LLM deployment
+**Q: Any cool AI-generated solutions?**
+A: Nothing very unique.
 
-### Trade-offs
-- **Performance vs Privacy**: Chose local deployment for data privacy
-- **Cost vs Quality**: Selected open-source models to minimize costs
-- **Simplicity vs Features**: Focused on core functionality first
+---
 
-## Future Improvements
+**Q: Where did AI not help?**
+A: When building **hybrid search** with LangChain, AI couldn’t fix **compatibility issues**.
 
-1. **Authentication & Security**
-   - Add OAuth2 authentication
-   - Implement role-based access control
-   - Add audit logging
-
-2. **Performance Enhancements**
-   - Implement caching layer
-   - Add batch processing capabilities
-   - Optimize vector search
-
-3. **Feature Additions**
-   - Support for more LLM providers
-   - Enhanced document preprocessing
-   - Real-time data synchronization
-   - Advanced analytics dashboard
-
-4. **Infrastructure**
-   - Containerization with Docker
-   - CI/CD pipeline setup
-   - Monitoring and metrics
-   - Rate limiting
+---
 
 ## Demo
 [Link to live demo or screenshots to be added]
 
-## Testing
-
-Run the test suite:
-```bash
-pytest test_rag.py -v
-```
 
 ## Configuration
 
@@ -471,29 +396,43 @@ Key configuration parameters:
 - `score_threshold`: 0.3 (similarity threshold for retrieval)
 - `k`: 5 (number of documents to retrieve)
 - `model_name`: "sentence-transformers/all-mpnet-base-v2" (embedding model)
-- `llm_model`: "gemma3:latest" (Ollama model)
+- `llm_model`: "mistral:7b" (Ollama model)
+Sure! Here's the same **Technical Decisions** section rewritten in simple, natural, layman-friendly English—great for interviews, reports, or casual discussions:
 
-## Error Handling
+---
 
-The application handles various error cases:
-- Connection failures to Ollama
-- Invalid data formats
-- Missing or malformed queries
-- Vector store initialization errors
+### Technical Decisions
 
-## Performance Considerations
+**Q: Why did you use Mistral 7B (Ollama) instead of OpenAI’s models?**
+A: OpenAI is powerful, but it can get expensive, especially when testing a lot. I used **Mistral 7B with Ollama** because it runs offline and gand performed well still being small in size than OpenAI models. It gave me full control and no extra cost.
 
-- Uses FAISS for efficient vector search
-- Implements document chunking for better retrieval
-- Caches embeddings for improved performance
-- Uses hybrid search for better recall
+---
+
+**Q: What made you choose Ollama?**
+A: Ollama was lightweight and easy to set up locally. It allowed faster development without needing internet or worrying about token limits. It was ideal for zero-cost experimentation.
+
+---
+
+**Q: Why did you use HuggingFace Embeddings with FAISS?**
+A: I used HuggingFace’s Transformer-based Embeddings with FAISS for vector search. FAISS is a fast and memory-efficient tool for vector search, and together they allowed me to build a robust local retrieval system without needing proprietary or paid services.
+
+---
+
+**Q: How did you balance speed, cost, and privacy?**
+A:
+
+**Performance**: While local models aren’t as powerful as GPT-4, Mistral 7B performed well enough for the use case—especially with a clean prompt and quality embeddings.
+
+**Cost**: By avoiding cloud APIs, I cut down significant costs, especially during prototyping where models are called frequently.
+
+**Privacy**: Since everything ran locally—LLM, embeddings, and vector store—sensitive data stayed secure on my machine, which is a big plus for client-facing or internal tools.
+---
+
+Let me know if you'd like this turned into a short summary or added to your portfolio project!
+
 
 ## Future Improvements
 
-1. Add authentication and authorization
-2. Implement caching layer
-3. Add support for more LLM providers
-4. Enhance document preprocessing
-5. Add batch processing capabilities
-6. Implement rate limiting
-7. Add monitoring and metrics 
+1. Supabase Integration for Full RAG
+2. Hybrid Search
+3. Streaming Response
