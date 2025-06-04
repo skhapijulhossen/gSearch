@@ -386,8 +386,11 @@ A: When building **hybrid search** with LangChain, AI couldn’t fix **compatibi
 
 ---
 
-## Demo
-[Link to live demo or screenshots to be added]
+## Demo Video
+
+Watch the demo video running fully local:
+
+[Demo Video on Google Drive](https://drive.google.com/file/d/1hHEHnR12WXXoY3ZZKGPQN_1b9MAHcnlQ/view?usp=drivesdk)
 
 
 ## Configuration
