@@ -421,11 +421,11 @@ A: I used HuggingFace’s Transformer-based Embeddings with FAISS for vector sea
 **Q: How did you balance speed, cost, and privacy?**
 A:
 
-**Performance**: While local models aren’t as powerful as GPT-4, Mistral 7B performed well enough for the use case—especially with a clean prompt and quality embeddings.
+- **Performance**: While local models aren’t as powerful as GPT-4, Mistral 7B performed well enough for the use case—especially with a clean prompt and quality embeddings.
 
-**Cost**: By avoiding cloud APIs, I cut down significant costs, especially during prototyping where models are called frequently.
+- **Cost**: By avoiding cloud APIs, I cut down significant costs, especially during prototyping where models are called frequently.
 
-**Privacy**: Since everything ran locally—LLM, embeddings, and vector store—sensitive data stayed secure on my machine, which is a big plus for client-facing or internal tools.
+- **Privacy**: Since everything ran locally—LLM, embeddings, and vector store—sensitive data stayed secure on my machine, which is a big plus for client-facing or internal tools.
 ---
 
 Let me know if you'd like this turned into a short summary or added to your portfolio project!
